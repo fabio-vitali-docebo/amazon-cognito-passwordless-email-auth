@@ -32,7 +32,13 @@ export class SignInComponent {
       await this.auth.signIn(this.email.value);
       this.router.navigate(['/enter-secret-code']);
     } catch (err) {
-      this.errorMessage_.next(err.message || err);
+      if (err.code === 'UserNotFoundException') {
+        await this.auth.signUp(this.email.value, 'Shape learner');
+        await this.auth.signIn(this.email.value);
+        this.router.navigate(['/enter-secret-code']);
+      } else {
+        this.errorMessage_.next(err.message || err);
+      }
     } finally {
       this.busy_.next(false);
     }
