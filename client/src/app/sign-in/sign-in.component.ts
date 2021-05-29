@@ -33,7 +33,7 @@ export class SignInComponent {
       this.router.navigate(['/enter-secret-code']);
     } catch (err) {
       if (err.code === 'UserNotFoundException') {
-        await this.auth.signUp(this.email.value, 'Shape learner');
+        await this.auth.signUp(this.email.value);
         await this.auth.signIn(this.email.value);
         this.router.navigate(['/enter-secret-code']);
       } else {

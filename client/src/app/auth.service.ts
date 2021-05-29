@@ -12,15 +12,20 @@ import { CognitoUser } from 'amazon-cognito-identity-js';
 export class AuthService {
 
   private cognitoUser: CognitoUser & { challengeParam: { email: string } };
+  private clientMetadata: {[key: string]: string};
 
   // Get access to window object in the Angular way
   private window: Window;
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.window = this.document.defaultView;
+    this.clientMetadata = {
+      shapeId: 'hid23yr92g4ri3gti',
+      callingUrl: this.window.parent !== this.window ? null : this.document.referrer,
+    };
   }
 
   public async signIn(email: string) {
-    this.cognitoUser = await Auth.signIn(email);
+    this.cognitoUser = await Auth.signIn(email, undefined, this.clientMetadata);
   }
 
   public async signOut() {
@@ -28,7 +33,7 @@ export class AuthService {
   }
 
   public async answerCustomChallenge(answer: string) {
-    this.cognitoUser = await Auth.sendCustomChallengeAnswer(this.cognitoUser, answer);
+    this.cognitoUser = await Auth.sendCustomChallengeAnswer(this.cognitoUser, answer, this.clientMetadata);
     return this.isAuthenticated();
   }
 
@@ -36,13 +41,10 @@ export class AuthService {
     return this.cognitoUser.challengeParam;
   }
 
-  public async signUp(email: string, fullName: string) {
+  public async signUp(email: string) {
     const params = {
       username: email,
-      password: this.getRandomString(30),
-      attributes: {
-        name: fullName
-      }
+      password: this.getRandomString(30)
     };
     await Auth.signUp(params);
   }
